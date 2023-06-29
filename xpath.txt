@@ -1,1 +1,4 @@
 Links = //div[@class="MainSpotlight_lateral__content__QvyFY"]/a/@href
+Titulo= //h1[@class="MainContent_main__title__6UiB8"]/text()'
+Resumen =  //h2[@class="MainContent_mainContent__teaser__mftWU"]/text()
+Cuerpo = //div[@class="MainContent_main__body__i6gEa"]/p[not(@class)]/text()
