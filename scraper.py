@@ -3,17 +3,18 @@ import lxml.html as html
 import datetime
 import os
 
-HOME_URL = "https://www.larepublica.co"
-XPATH_LINK_TO_ARTICLE = '//div[@class="row mt-4 second-news"]//a/@href'
-XPATH_TITLE = '//div[@class= "col-8 order-2 d-flex flex-column"]/div/h2/span/text()'
-XPATH_SUMMARY = '//div[@class="lead"]/p/text()'
-XPATH_BODY = '//div[@class="html-content"]/p/text()'
+HOME_URL = "https://cyware.com/cyber-security-news-articles"
+XPATH_LINK_TO_ARTICLE = '//div[@class="cy-panel__body"]/a/@href'
+XPATH_TITLE = '//h1[@class="cy-card__title m-0 cursor-pointer pb-3"]/text()'
+XPATH_SUMMARY = '//div[@class="cy-card__description"]/text()'
+XPATH_BODY = '//div[@class="zox-post-body left zoxrel zox100"]/p/text()'
 
 
 def parse_notice(link,today):
     try:
         response = requests.get(link)
         if response.status_code == 200:
+            print('si jalo')
             notice = response.content.decode('utf-8')
             parsed = html.fromstring(notice)
             
