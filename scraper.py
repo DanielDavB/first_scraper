@@ -1,10 +1,10 @@
 import requests
-import lxml.html as html 
+import lxml.html as html
 import datetime
 import os
 import time
 import re
-import supabase
+from supabase import create_client  # Import create_client directly
 
 HOME_URL = "https://thehackernews.com/"
 XPATH_LINK_TO_ARTICLE = '//a[@class="story-link"]/@href'
@@ -16,10 +16,11 @@ SUPABASE_API_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSI
 SUPABASE_PROJECT_NAME = "infosecur"
 SUPABASE_TABLE_NAME = "data_links"
 
+
 def insert_into_database(title, link):
     try:
         # Connect to Supabase
-        supabase_client = supabase.create_client(
+        supabase_client = create_client(  # Use create_client directly
             SUPABASE_URL,
             SUPABASE_API_KEY,
             SUPABASE_PROJECT_NAME
@@ -29,7 +30,7 @@ def insert_into_database(title, link):
         response = supabase_client.table(SUPABASE_TABLE_NAME).upsert([{"title": title, "link": link}], returning="minimal")
 
         if response.status_code != 200:
-            print("Error inserting into database:", response.text)
+            print("Error inserting into the database:", response.text)
 
     except Exception as e:
         print("Error:", e)
