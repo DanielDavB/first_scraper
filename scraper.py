@@ -4,36 +4,32 @@ import datetime
 import os
 import time
 import re
+import schedule
 from supabase import create_client  # Import create_client directly
+import os
+from supabase import create_client, Client
+
 
 HOME_URL = "https://thehackernews.com/"
 XPATH_LINK_TO_ARTICLE = '//a[@class="story-link"]/@href'
 XPATH_TITLE = '//h1[@class="story-title"]//text()'
 
-# Supabase configuration
-SUPABASE_URL = "https://db.asniuqxpkwgyoyprturw.supabase.co"
-SUPABASE_API_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImFzbml1cXhwa3dneW95cHJ0dXJ3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE2OTk5ODQ1MjYsImV4cCI6MjAxNTU2MDUyNn0.2XVpfJvrAdrLt7sZ8_WlSbG8v_s9kbJoy9yQx-IkmWo"
-SUPABASE_PROJECT_NAME = "infosecur"
-SUPABASE_TABLE_NAME = "data_links"
-
 
 def insert_into_database(title, link):
-    try:
-        # Connect to Supabase
-        supabase_client = create_client(  # Use create_client directly
-            SUPABASE_URL,
-            SUPABASE_API_KEY,
-            SUPABASE_PROJECT_NAME
-        )
+    # Create Supabase client
+    supabase: Client = create_client("https://asniuqxpkwgyoyprturw.supabase.co",
+                                     "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImFzbml1cXhwa3dneW95cHJ0dXJ3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE2OTk5ODQ1MjYsImV4cCI6MjAxNTU2MDUyNn0.2XVpfJvrAdrLt7sZ8_WlSbG8v_s9kbJoy9yQx-IkmWo")
 
-        # Insert into the database
-        response = supabase_client.table(SUPABASE_TABLE_NAME).upsert([{"title": title, "link": link}], returning="minimal")
+    # Define data to insert into the 'data_links' table
+    data_links = {"title": title, "link": link}
 
-        if response.status_code != 200:
-            print("Error inserting into the database:", response.text)
+    # Insert data into the 'data_links' table
+    data, count = supabase.table('data_links').insert(data_links).execute()
 
-    except Exception as e:
-        print("Error:", e)
+    # Print the response
+    print("Data inserted:", data)
+    print("Number of rows inserted:", count)
+
 
 def sanitize_title(title):
     # Remove characters that are not allowed in filenames
@@ -42,30 +38,31 @@ def sanitize_title(title):
     title = title.replace(' ', '_')
     return title
 
+
 def parse_notice(link, today):
     try:
         response = requests.get(link)
         if response.status_code == 200:
             notice = response.content.decode('utf-8')
             parsed = html.fromstring(notice)
-            
+
             try:
                 title = parsed.xpath(XPATH_TITLE)[0]
                 title = title.replace('\n', '').strip()
                 title = sanitize_title(title)  # Sanitize the title
-                
+
                 print(link, title)
                 # Insert into the database
                 insert_into_database(title, link)
 
             except IndexError:
                 return
-            
-                
+
         else:
-            raise ValueError(f'Error: {response.status_code}')    
+            raise ValueError(f'Error: {response.status_code}')
     except ValueError as ve:
         print(ve)
+
 
 def parse_home():
     try:
@@ -74,20 +71,26 @@ def parse_home():
             home = response.content.decode('utf-8')
             parsed = html.fromstring(home)
             links_to_notice = parsed.xpath(XPATH_LINK_TO_ARTICLE)
-            
+
             today = datetime.date.today().strftime('%d-%m-%Y')
-            if not os.path.isdir(today):
-                os.mkdir(today)
             
+
             for link in links_to_notice:
-                parse_notice(link, today)   
+                parse_notice(link, today)
         else:
             raise ValueError(f'Error: {response.status_code}')
     except ValueError as ve:
         print(ve)
 
+    
 def run():
     parse_home()
+    
+schedule.every().day.at("10:30").do(run)
 
-if __name__ == '__main__':
-    run()
+while True: 
+    schedule.run_pending()
+    time.sleep(1)
+
+# if __name__ == '__main__':
+#     run()
