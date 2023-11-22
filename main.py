@@ -10,9 +10,9 @@ import os
 from supabase import create_client, Client
 
 
-HOME_URL = "https://thehackernews.com/"
-XPATH_LINK_TO_ARTICLE = '//a[@class="story-link"]/@href'
-XPATH_TITLE = '//h1[@class="story-title"]//text()'
+HOME_URL = "https://elpais.com/noticias/seguridad-internet/"
+XPATH_LINK_TO_ARTICLE = '//h2[@class="c_t "]//a/@href'
+XPATH_TITLE = '//h2[@class="c_t "]//a'
 
 
 def insert_into_database(title, link):
@@ -84,13 +84,17 @@ def parse_home():
 
     
 def run():
+    print("running task")
     parse_home()
-    
-schedule.every().day.at("10:30").do(run)
+
+
+#Comment this section to run instantly
+schedule.every(2).minutes.do(run)
 
 while True: 
     schedule.run_pending()
     time.sleep(1)
 
-# if __name__ == '__main__':
+#uncomment this line to run instantly
+# if __name__ == 'main':
 #     run()
