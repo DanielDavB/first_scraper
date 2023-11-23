@@ -10,9 +10,9 @@ import os
 from supabase import create_client, Client
 
 
-HOME_URL = "https://elpais.com/noticias/seguridad-internet/"
-XPATH_LINK_TO_ARTICLE = '//h2[@class="c_t "]//a/@href'
-XPATH_TITLE = '//h2[@class="c_t "]//a'
+HOME_URL = "https://www.20minutos.es/minuteca/seguridad-informatica/1/"
+XPATH_LINK_TO_ARTICLE = '//div[@class="media-content"]//a/@href'
+XPATH_TITLE = '//div[@class="media-content"]//a'
 
 
 def insert_into_database(title, link):
@@ -34,8 +34,6 @@ def insert_into_database(title, link):
 def sanitize_title(title):
     # Remove characters that are not allowed in filenames
     title = re.sub(r'[\/:*?"<>|]', '', title)
-    # Replace spaces with underscores
-    title = title.replace(' ', '_')
     return title
 
 
@@ -48,7 +46,7 @@ def parse_notice(link, today):
 
             try:
                 title = parsed.xpath(XPATH_TITLE)[0]
-                title = title.replace('\n', '').strip()
+                title = title.text_content().strip()
                 title = sanitize_title(title)  # Sanitize the title
 
                 print(link, title)
@@ -84,17 +82,13 @@ def parse_home():
 
     
 def run():
-    print("running task")
     parse_home()
+    
+# schedule.every(2).minutes.do(run)
 
+# while True: 
+#     schedule.run_pending()
+#     time.sleep(1)
 
-#Comment this section to run instantly
-schedule.every(2).minutes.do(run)
-
-while True: 
-    schedule.run_pending()
-    time.sleep(1)
-
-#uncomment this line to run instantly
-# if __name__ == 'main':
-#     run()
+if __name__ == '__main__':
+    run()
