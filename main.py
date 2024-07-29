@@ -84,11 +84,11 @@ def parse_home():
 def run():
     parse_home()
     
-# schedule.every(2).minutes.do(run)
+schedule.every(24).hours.do(run)
 
-# while True: 
-#     schedule.run_pending()
-#     time.sleep(1)
+while True: 
+    schedule.run_pending()
+    time.sleep(1)
 
-if __name__ == '__main__':
-    run()
+# if __name__ == '__main__':
+#     run()
